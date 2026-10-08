@@ -1,0 +1,11 @@
+# trình duyệt / hệ điều hành
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ảnh sản phẩm đặt trên từng máy (giữ file hướng dẫn trong thư mục)
+images/*
+!images/DAT-ANH-SAN-PHAM-VAO-DAY.txt
+
+# file thử nghiệm
+__test_*

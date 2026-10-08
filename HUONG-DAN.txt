@@ -1,0 +1,55 @@
+﻿HƯỚNG DẪN DÙNG CÔNG CỤ FLYER GIÁ KHUYẾN MÃI
+============================================
+
+MỞ CÔNG CỤ
+- Windows: bấm đúp Mo-Flyer.bat. Một cửa sổ đen hiện ra và trình duyệt tự mở trang http://localhost:8765/
+  GIỮ cửa sổ đen mở trong lúc dùng. Đóng cửa sổ đen là tắt công cụ.
+- Mac: bấm đúp Mo-Flyer.command (lần đầu nếu bị chặn: chuột phải > Open > Open).
+- Nếu lần đầu Windows hiện "Windows protected your PC": bấm "More info" > "Run anyway".
+
+ẢNH SẢN PHẨM
+- Bỏ ảnh vào thư mục images (cùng chỗ với file này).
+- Tên file bắt đầu bằng mã sản phẩm: HVX02.png, BA03.jpg, hoặc "HVX03 xot tom kho quet.png" đều được.
+- Thêm/sửa ảnh xong thì bấm "Quét lại thư mục" trong trang (hoặc tải lại trang).
+- PNG nền trong suốt cho kết quả đẹp nhất. Viền trong suốt thừa sẽ được tự cắt.
+- Ảnh nền trắng/nền thường: tick "Tự xoá nền ảnh (AI)" ở bước 2 (mặc định đã bật), trang sẽ tự tách nền.
+  Lần đầu cần internet để tải mô hình (khoảng 40MB). Ảnh đã xoá nền được lưu lại, lần sau không cần mạng.
+
+MỖI TUẦN
+1. Mở công cụ.
+2. Bấm "Mở file Excel / CSV", chọn file tuần mới (file có nhiều sheet thì chọn sheet),
+   hoặc lấy thẳng từ Google Sheets (xem mục GOOGLE SHEETS bên dưới).
+3. Kiểm tra cảnh báo, bỏ tick sản phẩm không muốn đăng.
+4. Chọn mẫu thiết kế (bước 3, hoặc ô "Mẫu" trên thanh trên cùng): Kome Pop, Tối giản,
+   Sale đen-vàng, Lễ hội / Tết, Mùa xuân, Mùa hè, Mùa thu, Mùa đông.
+5. Bấm "Xuất PNG". Ảnh lưu vào thư mục Tải xuống (Downloads).
+
+GOOGLE SHEETS (tự lấy dữ liệu từ file campaign, file vẫn riêng tư)
+Cài một lần:
+1. Mở file campaign trên Google Sheets > menu Tiện ích mở rộng > Apps Script.
+2. Xoá hết nội dung có sẵn trong Code.gs, dán toàn bộ nội dung file google-apps-script.gs
+   (cùng thư mục với file này) vào, bấm biểu tượng Lưu.
+3. Bấm Triển khai (Deploy) > Tùy chọn triển khai mới (New deployment) > bánh răng > Ứng dụng web (Web app).
+   - Thực thi với tư cách (Execute as): Tôi (Me)
+   - Người có quyền truy cập (Who has access): Bất kỳ ai trong tổ chức (Anyone within ...).
+     KHÔNG chọn "Bất kỳ ai" (Anyone) - khi đó ai có link cũng xem được dữ liệu.
+   Bấm Triển khai, cấp quyền khi được hỏi (chọn tài khoản công ty > Cho phép).
+4. Copy "URL ứng dụng web" (kết thúc bằng /exec).
+5. Trong công cụ flyer, bước 1 > mở "Lấy từ Google Sheets" > dán link > bấm Kết nối.
+6. Tháng / Tuần để "Tự động" (tháng hiện tại, tuần đang chạy hoặc tuần sắp tới) hoặc chọn tay > bấm Tải dữ liệu.
+   Tick "Tự tải mỗi lần mở công cụ" để mở công cụ là có ngay dữ liệu tuần này.
+Script chỉ gửi các tab tháng (2026/10...) và chỉ các cột in lên flyer: mã, tên, phân loại, giá cũ lẻ,
+giá sale lẻ, %OFF, EXP. Giá vốn, lãi, tồn kho, các tab khác không bao giờ được gửi ra.
+Lưu ý:
+- Trình duyệt phải đang đăng nhập Google bằng tài khoản công ty. Nếu đăng nhập nhiều tài khoản cùng lúc
+  mà bị lỗi, hãy dùng một cửa sổ/hồ sơ Chrome chỉ đăng nhập tài khoản công ty.
+- Sửa google-apps-script.gs sau này: dán lại > Lưu > Triển khai > Quản lý triển khai > biểu tượng bút chì >
+  Phiên bản: Phiên bản mới > Triển khai. (Làm vậy thì link /exec giữ nguyên.)
+
+LƯU Ý
+- Không cần internet (trừ lần đầu tải mô hình xoá nền và khi lấy dữ liệu từ Google Sheets). Không cài thêm gì.
+- Cài đặt (danh mục → phần, thứ tự phần, ghi chú) được lưu trong trình duyệt của máy này.
+  Dùng cùng một trình duyệt (Chrome hoặc Edge) mỗi lần để giữ cài đặt.
+- Có thể chép cả thư mục này lên ổ chung/USB để máy khác dùng. Ảnh trong thư mục images đi theo luôn.
+- Nếu bấm Mo-Flyer.bat không chạy (máy công ty chặn PowerShell): mở trực tiếp index.html bằng Chrome/Edge.
+  Mọi chức năng vẫn chạy, chỉ trừ việc tự lấy ảnh từ thư mục images (phải chọn ảnh thủ công ở bước 2).
