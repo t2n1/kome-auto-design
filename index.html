@@ -256,6 +256,20 @@ input[type=checkbox]{width:16px;height:16px;accent-color:var(--ui-accent);margin
 .fl-sublabel i{flex:1;height:3px;background:var(--deep);position:relative}
 .fl-sublabel i::after{content:"";position:absolute;right:-6px;top:50%;width:13px;height:13px;margin-top:-6.5px;border-radius:50%;background:var(--deep)}
 .fl-row{display:flex;justify-content:center;align-items:stretch;gap:18px}
+.seg{display:inline-flex;border:1px solid var(--ui-line);border-radius:9px;overflow:hidden;background:var(--ui-panel)}
+.seg button{border:0;background:none;padding:7px 11px;font-size:12.5px;font-weight:600;cursor:pointer;color:inherit}
+.seg button+button{border-left:1px solid var(--ui-line)}
+.seg button[aria-pressed="true"]{background:var(--ui-accent);color:var(--ui-accent-ink)}
+.edit-move,.edit-nudge{user-select:none;-webkit-user-select:none;touch-action:none}
+.edit-move .fl-card{cursor:grab}
+.edit-move .fl-card:hover{outline:2px dashed rgba(0,0,0,.35);outline-offset:3px}
+.edit-move .fl-card.dragging{opacity:.3}
+.edit-move .fl-card.drop-before{box-shadow:-10px 0 0 -2px #1E7BE5}
+.edit-move .fl-card.drop-after{box-shadow:10px 0 0 -2px #1E7BE5}
+.edit-nudge .fl-badge,.edit-nudge .fl-price,.edit-nudge .fl-simg img,.edit-nudge .fl-item{cursor:move}
+.edit-nudge .fl-price:hover,.edit-nudge .fl-simg img:hover,.edit-nudge .fl-item:hover{outline:2px dashed #1E7BE5;outline-offset:2px}
+.fl-price{position:relative;z-index:3}
+.fl-ghost>.fl-card{box-shadow:0 14px 30px rgba(0,0,0,.35)}
 .fl-row+.fl-row{margin-top:36px}
 .fl-note{margin-top:30px;background:var(--note-bg);color:var(--note-ink);border-radius:12px;padding:9px 16px 10px;font-family:"KF Mochiy","Hiragino Sans",sans-serif;font-size:21px;line-height:1.3;text-align:center}
 
@@ -322,11 +336,10 @@ input[type=checkbox]{width:16px;height:16px;accent-color:var(--ui-accent);margin
 <div class="app">
   <aside class="side" id="side">
     <h1>Flyer giá khuyến mãi</h1>
-    <p class="lead">Mở file Excel tuần này, flyer tự cập nhật giá, % giảm, gom nhóm 均一 và tự xếp ô. Chạy trên máy bạn, không cần mạng.</p>
 
     <section class="step">
       <h2><span class="num">1</span>Danh sách sản phẩm</h2>
-      <p class="hint">Mở file Excel, hoặc copy vùng dữ liệu trong Google Sheets (gồm cả dòng tiêu đề) rồi dán vào ô dưới.</p>
+      <p class="hint">Mở Excel hoặc dán bảng (kèm dòng tiêu đề).</p>
       <div class="btns" style="margin-top:0">
         <label class="btn primary">Mở file Excel / CSV<input type="file" class="vh" id="file-list" accept=".xlsx,.xls,.xlsm,.csv,.tsv,.txt"></label>
         <button class="btn" type="button" id="btn-sample">Dữ liệu mẫu</button>
@@ -344,7 +357,7 @@ input[type=checkbox]{width:16px;height:16px;accent-color:var(--ui-accent);margin
             <button class="btn primary" type="button" id="gs-load" disabled>Tải dữ liệu</button>
           </div>
           <label class="check"><input type="checkbox" id="gs-auto"><span>Tự tải mỗi lần mở công cụ</span></label>
-          <p class="hint" style="margin:6px 0 0">Cài một lần theo HUONG-DAN.txt (mục GOOGLE SHEETS). File vẫn riêng tư: chỉ máy đang đăng nhập tài khoản công ty mới lấy được.</p>
+          
         </div>
       </details>
       <div class="sheet-pick" id="sheet-pick" hidden><span>Sheet:</span><select id="sheet-sel"></select></div>
@@ -355,7 +368,7 @@ input[type=checkbox]{width:16px;height:16px;accent-color:var(--ui-accent);margin
       </details>
       <details class="box" id="cat-box">
         <summary>Danh mục → phần trên flyer <span class="sum-note" id="cat-sum"></span></summary>
-        <p class="hint" style="padding:0 12px;margin:0 0 6px">Mỗi danh mục (cột 区分) thuộc phần nào, nhóm con nào, màu gì. Lưu lại cho các tuần sau.</p>
+        
         <div class="cat-tbl" id="cat-tbl"></div>
       </details>
       <ul class="msgs" id="list-msgs"></ul>
@@ -369,10 +382,10 @@ input[type=checkbox]{width:16px;height:16px;accent-color:var(--ui-accent);margin
 
     <section class="step">
       <h2><span class="num">2</span>Ảnh sản phẩm</h2>
-      <p class="hint">Cách nhanh nhất: bỏ ảnh vào thư mục <code>images</code> nằm cạnh file <code>index.html</code>, tên file bắt đầu bằng mã sản phẩm (ví dụ <code>HVX02.png</code>). Trang tự lấy ảnh mỗi lần mở.</p>
+      <p class="hint">Bỏ ảnh vào thư mục <code>images</code>, tên file = mã SP (vd <code>HVX02.png</code>).</p>
       <div class="folder-status" id="folder-status"></div>
-      <label class="check" style="margin-top:12px"><input type="checkbox" id="opt-rmbg"><span>Tự xoá nền ảnh (AI)<small>Ảnh chưa có nền trong suốt sẽ được tách nền tự động. Lần đầu cần mạng để tải mô hình (khoảng 40MB), mỗi ảnh mất vài giây. Kết quả được lưu lại nên những lần sau mở rất nhanh.</small></span></label>
-      <p class="hint" style="margin-top:12px">Hoặc chọn ảnh thủ công (lưu trong trình duyệt, dùng khi ảnh không có trong thư mục):</p>
+      <label class="check" title="Ảnh chưa có nền trong suốt sẽ được tách nền tự động. Lần đầu cần mạng để tải mô hình (khoảng 40MB), mỗi ảnh mất vài giây. Kết quả được lưu lại nên những lần sau mở rất nhanh." style="margin-top:12px"><input type="checkbox" id="opt-rmbg"><span>Tự xoá nền ảnh (AI)</span></label>
+      <p class="hint" style="margin-top:12px">Hoặc chọn ảnh:</p>
       <label class="drop" id="drop"><input type="file" class="vh" id="file-img" accept="image/*" multiple><strong>Chọn ảnh</strong> hoặc kéo thả vào đây</label>
       <div class="missing" id="missing"></div>
       <details class="box" id="lib-box">
@@ -415,10 +428,10 @@ input[type=checkbox]{width:16px;height:16px;accent-color:var(--ui-accent);margin
             <option value="1">Chiều ngang 1080 px</option>
             <option value="2">Chiều ngang 2160 px (nét hơn)</option>
           </select></label>
-        <label class="check"><input type="checkbox" id="opt-dense"><span>Xếp ô nhỏ vào chỗ trống<small>Hàng nào còn dư chỗ sẽ kéo ô nhỏ phía sau lên lấp.</small></span></label>
+        <label class="check" title="Hàng nào còn dư chỗ sẽ kéo ô nhỏ phía sau lên lấp."><input type="checkbox" id="opt-dense"><span>Xếp ô nhỏ vào chỗ trống</span></label>
       </div>
       <div class="btns"><button class="btn primary" type="button" id="btn-export-side">Xuất PNG toàn bộ</button></div>
-      <p class="hint" id="sec-hint" hidden style="margin:12px 0 0">Các phần trên flyer: đổi thứ tự, sửa ghi chú cuối phần, xuất riêng từng phần (nền trong suốt).</p>
+      <p class="hint" id="sec-hint" hidden style="margin:12px 0 0">Các phần:</p>
       <div class="sec-list" id="sec-list"></div>
     </section>
   </aside>
@@ -426,6 +439,11 @@ input[type=checkbox]{width:16px;height:16px;accent-color:var(--ui-accent);margin
   <main class="stage">
     <div class="stage-bar">
       <div class="stage-sum" id="stage-sum">Đang tải…</div>
+      <div class="seg" id="edit-mode" role="group" aria-label="Chỉnh tay">
+        <button type="button" data-mode="move" aria-pressed="false" title="Cầm thẻ kéo sang chỗ khác trong cùng phần">Đổi chỗ thẻ</button>
+        <button type="button" data-mode="nudge" aria-pressed="false" title="Kéo ảnh, giá, badge trong thẻ. Bấm đúp để trả về chỗ cũ">Chỉnh ảnh/giá</button>
+        <button type="button" id="edit-reset" title="Đưa về vị trí tự động">Đặt lại</button>
+      </div>
       <label class="stage-style"><span>Mẫu</span><select id="stage-style"></select></label>
       <button class="btn primary" type="button" id="btn-export">Xuất PNG</button>
     </div>
@@ -606,6 +624,9 @@ var state = {
   catMap: LS.get('kf2.catmap', {}),
   secOrder: LS.get('kf2.secorder', []),
   notes: LS.get('kf2.notes', {}),
+  cardOrder: LS.get('kf2.cardorder', {}),   // manual card order per section|sub → [card id]
+  nudge: LS.get('kf2.nudge', {}),           // manual offsets: card id → {part: [dx, dy]}
+  editMode: 'off',
   workbook: null,
   folderImgs: new Map(),
   idbOk: true
@@ -805,7 +826,14 @@ function buildSections(){
         if(c.maxPct > s.max) s.max = c.maxPct;
       });
       sb.cards = orderCards(sb.cards, S.sort);
-      sb.rows = packRows(sb.cards, S.dense);
+      // a hand-made order (drag & drop) wins; packing then keeps that order instead of filling gaps
+      var mo = state.cardOrder[s.title + '|' + sb.title];
+      if(mo && mo.length){
+        var pos = {}; mo.forEach(function(id, i){ pos[id] = i; });
+        var known = sb.cards.filter(function(c){ return pos[cardId(c)] != null; }).sort(function(a, b){ return pos[cardId(a)] - pos[cardId(b)]; });
+        sb.cards = known.concat(sb.cards.filter(function(c){ return pos[cardId(c)] == null; }));
+      }
+      sb.rows = packRows(sb.cards, S.dense && !(mo && mo.length));
     });
     // only the first card (in layout order) carrying the section's top % gets the highlight badge
     s.top = null;
@@ -916,6 +944,7 @@ function picHTML(code){
   var img = imgOf(code);
   return img ? '<img src="' + img + '" alt="">' : '<div class="fl-noimg">' + esc(code) + '<small>Chưa có ảnh</small></div>';
 }
+function cardId(c){ return c.items[0].code; }
 function cardHTML(c, topCard){
   var top = c === topCard;
   var band = toneOf(c.theme).band, sp = cardSpan(c);
@@ -925,7 +954,7 @@ function cardHTML(c, topCard){
   var oldMain = (c.sameOld && c.olds.length === 1 && c.olds[0] > c.price) ? '<div class="fl-old">' + fmtPrice(c.olds[0]) + '</div>' : '';
   if(c.n === 1){
     var it = c.items[0];
-    return '<div class="fl-card is-single" style="' + flex + '--band:' + band + '">' + badgeHTML(c, top) +
+    return '<div class="fl-card is-single" data-cid="' + esc(cardId(c)) + '" style="' + flex + '--band:' + band + '">' + badgeHTML(c, top) +
       '<div class="fl-cream"><div class="fl-simg">' + picHTML(it.code) + '</div>' +
       '<div class="fl-price"><div class="fl-code">' + esc(it.code) + '</div><div class="fl-num" data-base="96">' + fmtPrice(c.price) + '</div>' + oldMain + '</div></div>' +
       '<div class="fl-band"><span>' + (it.exp ? 'EXP: ' + esc(it.exp) : '') + '</span></div></div>';
@@ -939,7 +968,7 @@ function cardHTML(c, topCard){
   }).join('');
   var bandHTML = oneRow ? '<div class="fl-band"><div class="fl-bexps">' +
     c.items.map(function(it){ return '<span>' + (it.exp ? 'EXP: ' + esc(it.exp) : '') + '</span>'; }).join('') + '</div></div>' : '';
-  return '<div class="fl-card is-multi ' + (oneRow ? 'has-band' : 'no-band') + '" style="' + flex + '--band:' + band + ';--per:' + per + ';--iw:' + iw + 'px;--pw:' + (sp >= 12 ? 250 : 210) + 'px">' +
+  return '<div class="fl-card is-multi ' + (oneRow ? 'has-band' : 'no-band') + '" data-cid="' + esc(cardId(c)) + '" style="' + flex + '--band:' + band + ';--per:' + per + ';--iw:' + iw + 'px;--pw:' + (sp >= 12 ? 250 : 210) + 'px">' +
     badgeHTML(c, top) + '<div class="fl-cream" style="padding-top:' + (oneRow ? 14 : 16) + 'px"><div class="fl-items">' + items + '</div>' +
     '<div class="fl-price"><div class="fl-num" data-base="124">' + fmtPrice(c.price) + '</div><div class="fl-kin">均一</div>' + oldMain + '</div></div>' + bandHTML + '</div>';
 }
@@ -948,7 +977,7 @@ function sectionHTML(s, i){
   var body = s.subs.map(function(sb){
     var st = toneOf(sb.theme);
     var label = sb.title ? '<div class="fl-sublabel" style="--band:' + st.band + ';--deep:' + st.deep + '"><span>' + esc(sb.title) + '</span><i></i></div>' : '';
-    return '<div class="fl-sub">' + label + sb.rows.map(function(r){
+    return '<div class="fl-sub" data-sk="' + esc(s.title + '|' + sb.title) + '">' + label + sb.rows.map(function(r){
       return '<div class="fl-row">' + r.map(function(c){ return cardHTML(c, s.top); }).join('') + '</div>';
     }).join('') + '</div>';
   }).join('');
@@ -1076,6 +1105,125 @@ function fitPrices(){
     img.style.cssText = 'left:0;right:auto;bottom:auto;top:' + y + 'px;width:' + best.w + 'px;height:' + best.h + 'px';
     cream.style.paddingLeft = (+cream.dataset.padl + best.left) + 'px';
   });
+  applyNudges();
+}
+/* ---------- hand edits on the flyer: drag cards to reorder, drag picture/price/badge inside a card ---------- */
+function partEl(card, part){
+  if(part === 'badge') return card.querySelector('.fl-badge');
+  if(part === 'price') return card.querySelector('.fl-price');
+  if(part === 'img') return card.querySelector('.fl-simg img, .fl-simg .fl-noimg');
+  var m = /^item:(\d+)$/.exec(part);
+  return m ? card.querySelectorAll('.fl-item')[+m[1]] : null;
+}
+function partOf(target, card){
+  if(target.closest('.fl-badge')) return 'badge';
+  if(target.closest('.fl-price')) return 'price';
+  if(target.closest('.fl-simg')) return 'img';
+  var it = target.closest('.fl-item');
+  return it ? 'item:' + Array.prototype.indexOf.call(card.querySelectorAll('.fl-item'), it) : null;
+}
+function applyNudges(){
+  Array.prototype.forEach.call(document.querySelectorAll('#flyer .fl-card[data-cid]'), function(card){
+    var n = state.nudge[card.dataset.cid] || {};
+    ['badge', 'price', 'img'].concat(Array.prototype.map.call(card.querySelectorAll('.fl-item'), function(_, i){ return 'item:' + i; })).forEach(function(part){
+      var el = partEl(card, part); if(!el) return;
+      var d = n[part];
+      el.style.translate = d ? d[0] + 'px ' + d[1] + 'px' : '';
+    });
+  });
+}
+function setEditMode(m){
+  state.editMode = m;
+  $('#flyer').classList.toggle('edit-move', m === 'move');
+  $('#flyer').classList.toggle('edit-nudge', m === 'nudge');
+  Array.prototype.forEach.call(document.querySelectorAll('#edit-mode [data-mode]'), function(b){ b.setAttribute('aria-pressed', String(b.dataset.mode === m)); });
+}
+function bindFlyerEdit(){
+  var fl = $('#flyer'), drag = null;
+  function scale(){ return fl.getBoundingClientRect().width / Math.max(1, fl.offsetWidth); }
+  function clearMarks(){ Array.prototype.forEach.call(fl.querySelectorAll('.drop-before,.drop-after'), function(el){ el.classList.remove('drop-before', 'drop-after'); }); }
+  fl.addEventListener('pointerdown', function(e){
+    if(state.editMode === 'off' || e.button !== 0) return;
+    var card = e.target.closest('.fl-card[data-cid]'); if(!card) return;
+    var part = state.editMode === 'nudge' ? partOf(e.target, card) : null;
+    if(state.editMode === 'nudge' && !part) return;
+    e.preventDefault();
+    var n = state.nudge[card.dataset.cid] || {}, start = part && n[part] ? n[part].slice() : [0, 0];
+    drag = {card: card, part: part, x: e.clientX, y: e.clientY, start: start, k: scale(), moved: false, ghost: null, target: null};
+    try{ fl.setPointerCapture(e.pointerId); }catch(err){}
+  });
+  fl.addEventListener('pointermove', function(e){
+    if(!drag) return;
+    var dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+    if(!drag.moved && Math.abs(dx) + Math.abs(dy) < 5) return;
+    drag.moved = true;
+    if(drag.part){
+      var el = partEl(drag.card, drag.part);
+      drag.cur = [Math.round(drag.start[0] + dx / drag.k), Math.round(drag.start[1] + dy / drag.k)];
+      if(el) el.style.translate = drag.cur[0] + 'px ' + drag.cur[1] + 'px';
+      return;
+    }
+    if(!drag.ghost){
+      // the ghost lives outside the scaled flyer (a transformed parent would break position:fixed),
+      // wrapped in the flyer's classes so it keeps the same look
+      var r = drag.card.getBoundingClientRect(), g = document.createElement('div'), c = drag.card.cloneNode(true);
+      g.className = fl.className + ' fl-ghost';
+      g.style.cssText = 'position:fixed;left:' + r.left + 'px;top:' + r.top + 'px;width:' + drag.card.offsetWidth + 'px;height:' + drag.card.offsetHeight + 'px;' +
+        'padding:0;margin:0;background:none;transform:scale(' + drag.k + ');transform-origin:0 0;pointer-events:none;z-index:50;opacity:.85';
+      c.style.width = '100%'; c.style.height = '100%'; c.style.maxWidth = 'none'; c.style.margin = '0';
+      g.appendChild(c); document.body.appendChild(g); drag.ghost = g; drag.r = r;
+      drag.card.classList.add('dragging');
+    }
+    drag.ghost.style.left = drag.r.left + dx + 'px'; drag.ghost.style.top = drag.r.top + dy + 'px';
+    clearMarks(); drag.target = null;
+    var hit = document.elementFromPoint(e.clientX, e.clientY), tc = hit && hit.closest('.fl-card[data-cid]');
+    if(tc && tc !== drag.card && tc.closest('.fl-sub') === drag.card.closest('.fl-sub')){
+      var tr = tc.getBoundingClientRect(), after = e.clientX > tr.left + tr.width / 2;
+      tc.classList.add(after ? 'drop-after' : 'drop-before');
+      drag.target = {card: tc, after: after};
+    }
+  });
+  function end(){
+    if(!drag) return;
+    var d = drag; drag = null;
+    if(d.ghost) d.ghost.remove();
+    d.card.classList.remove('dragging'); clearMarks();
+    if(!d.moved) return;
+    if(d.part){
+      var n = state.nudge[d.card.dataset.cid] = state.nudge[d.card.dataset.cid] || {};
+      n[d.part] = d.cur; LS.set('kf2.nudge', state.nudge);
+      return;
+    }
+    if(!d.target) return;
+    var sub = d.card.closest('.fl-sub'), ids = Array.prototype.map.call(sub.querySelectorAll('.fl-card[data-cid]'), function(c){ return c.dataset.cid; });
+    var me = d.card.dataset.cid;
+    ids.splice(ids.indexOf(me), 1);
+    ids.splice(ids.indexOf(d.target.card.dataset.cid) + (d.target.after ? 1 : 0), 0, me);
+    state.cardOrder[sub.dataset.sk] = ids; LS.set('kf2.cardorder', state.cardOrder);
+    buildSections(); renderFlyer();
+  }
+  fl.addEventListener('pointerup', end);
+  fl.addEventListener('pointercancel', end);
+  // double-click a moved part to put it back
+  fl.addEventListener('dblclick', function(e){
+    if(state.editMode !== 'nudge') return;
+    var card = e.target.closest('.fl-card[data-cid]'), part = card && partOf(e.target, card);
+    var n = card && state.nudge[card.dataset.cid];
+    if(!n || !n[part]) return;
+    delete n[part]; if(!Object.keys(n).length) delete state.nudge[card.dataset.cid];
+    LS.set('kf2.nudge', state.nudge); applyNudges();
+  });
+  Array.prototype.forEach.call(document.querySelectorAll('#edit-mode [data-mode]'), function(b){
+    b.addEventListener('click', function(){ setEditMode(state.editMode === b.dataset.mode ? 'off' : b.dataset.mode); });
+  });
+  $('#edit-reset').addEventListener('click', function(){
+    var has = Object.keys(state.cardOrder).length || Object.keys(state.nudge).length;
+    if(!has){ toast('Chưa có chỉnh tay nào.'); return; }
+    if(!confirm('Đưa tất cả thẻ, ảnh, giá về vị trí tự động?')) return;
+    state.cardOrder = {}; state.nudge = {}; LS.set('kf2.cardorder', {}); LS.set('kf2.nudge', {});
+    buildSections(); renderFlyer(); toast('Đã đặt lại vị trí tự động.');
+  });
+  setEditMode('off');
 }
 function updateScale(){
   var body = $('#stage-body'), wrap = $('#scale-wrap'), sc = $('#scaler'), fl = $('#flyer');
@@ -1974,7 +2122,7 @@ function wire(){
 }
 
 function init(){
-  bindSettings(); wire(); bindGs();
+  bindSettings(); wire(); bindGs(); bindFlyerEdit();
   var saved = LS.get('kf.src', null);
   var looksOld = saved && /^Mã SP\tDanh mục\tGiá cũ\tGiá mới\tHSD\nHVX02/.test(saved);
   $('#src').value = (saved == null || looksOld) ? SAMPLE : saved;
