@@ -1927,7 +1927,44 @@ function renderBlob(node, transparent){
   }
   var p = (document.fonts && document.fonts.ready) ? document.fonts.ready : Promise.resolve();
   return p.then(function(){
-    return isSafari ? htmlToImage.toBlob(node, opts).then(function(){ return htmlToImage.toBlob(node, opts); }) : htmlToImage.toBlob(node, opts);
+    return isSafari ? htmlToImage.toCanvas(node, opts).then(function(){ return htmlToImage.toCanvas(node, opts); }) : htmlToImage.toCanvas(node, opts);
+  }).then(function(canvas){ return shrinkToLimit(canvas, transparent); });
+}
+// keep every export under MAX_BYTES: PNG if it fits, else the best JPG quality that fits
+// (not for transparent exports), else scale the picture down and try again
+var MAX_BYTES = 1990000;
+function encode(c, type, q){ return new Promise(function(res){ c.toBlob(res, type, q); }); }
+function shrinkToLimit(canvas, transparent){
+  state.lastShrink = null;
+  function attempt(c, round){
+    return encode(c, 'image/png').then(function(png){
+      if(png && png.size <= MAX_BYTES) return {blob: png, ext: 'png', w: c.width};
+      if(transparent) return {over: png ? png.size : 0};
+      var lo = 0.5, hi = 0.95, best = null, last = 0, i = 0;
+      function step(){
+        if(i++ >= 6) return Promise.resolve(best ? best : {over: last});
+        var q = (lo + hi) / 2;
+        return encode(c, 'image/jpeg', q).then(function(j){
+          last = j.size;
+          if(j.size <= MAX_BYTES){ best = {blob: j, ext: 'jpg', w: c.width, q: q}; lo = q; } else hi = q;
+          return step();
+        });
+      }
+      return encode(c, 'image/jpeg', hi).then(function(j){
+        return j.size <= MAX_BYTES ? {blob: j, ext: 'jpg', w: c.width, q: hi} : step();
+      });
+    }).then(function(r){
+      if(r.blob || round >= 6) return r.blob ? r : {blob: null};
+      // still too big → shrink by the size ratio (with a little headroom) and retry
+      var f = Math.max(0.5, Math.min(0.92, Math.sqrt(MAX_BYTES / r.over) * 0.95));
+      var d = document.createElement('canvas'); d.width = Math.round(c.width * f); d.height = Math.round(c.height * f);
+      var x = d.getContext('2d'); x.imageSmoothingQuality = 'high'; x.drawImage(c, 0, 0, d.width, d.height);
+      return attempt(d, round + 1);
+    });
+  }
+  return attempt(canvas, 0).then(function(r){
+    if(r.blob && r.w !== canvas.width) state.lastShrink = r.w;
+    return r;
   });
 }
 function saveBlob(blob, filename){
@@ -1943,11 +1980,12 @@ function saveBlob(blob, filename){
 function doExport(node, filename, transparent, btns){
   var miss = state.items.filter(function(it){ return it.included && !hasImg(it.code); }).length;
   btns.forEach(function(b){ b.disabled = true; b.dataset.label = b.textContent; b.textContent = 'Đang xuất…'; });
-  return renderBlob(node, transparent).then(function(blob){
-    if(!blob) throw new Error('empty');
-    return saveBlob(blob, filename);
+  return renderBlob(node, transparent).then(function(r){
+    if(!r || !r.blob) throw new Error('empty');
+    return saveBlob(r.blob, filename.replace(/\.png$/, '.' + r.ext));
   }).then(function(){
     var notes = [];
+    if(state.lastShrink) notes.push('Đã thu nhỏ còn rộng ' + state.lastShrink + ' px để file dưới 2 MB.');
     if(state.lastScaled) notes.push('Flyer dài nên ảnh này chỉ rộng ' + state.lastScaled + ' px. Muốn nét hơn, xuất từng phần ở bước 3.');
     if(miss) notes.push('Còn ' + miss + ' sản phẩm chưa có ảnh trên flyer.');
     if(notes.length) setTimeout(function(){ toast('Lưu ý: ' + notes.join(' '), 6000); }, 2900);
