@@ -151,6 +151,8 @@ input[type=checkbox]{width:16px;height:16px;accent-color:var(--ui-accent);margin
 .sec-head b span{font-weight:400;color:var(--ui-mute);font-size:12px}
 .sec-item input{min-height:30px;font-size:12.5px;padding:3px 8px}
 .sec-item label{font-size:12px;color:var(--ui-mute);display:grid;gap:3px}
+.sec-item input[type=checkbox]{min-height:0;width:16px;height:16px;padding:0;margin:0;flex:none;accent-color:var(--ui-accent);cursor:pointer}
+.sec-item.off{opacity:.5}
 
 .stage-bar{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 18px;background:color-mix(in srgb,var(--ui-stage) 88%,transparent);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
 .stage-sum{flex:1 1 auto;font-size:13px;color:var(--ui-ink);min-width:0}
@@ -627,6 +629,7 @@ var state = {
   cardOrder: LS.get('kf2.cardorder', {}),   // manual card order per section|sub → [card id]
   nudge: LS.get('kf2.nudge', {}),           // manual offsets: card id → {part: [dx, dy]}
   editMode: 'off',
+  hiddenSecs: LS.get('kf2.hiddensecs', []),   // section titles left off the flyer
   workbook: null,
   folderImgs: new Map(),
   idbOk: true
@@ -994,7 +997,7 @@ function renderFlyer(){
     fl.innerHTML = ''; $('#empty').hidden = false; $('#scale-wrap').hidden = true;
   } else {
     $('#empty').hidden = true; $('#scale-wrap').hidden = false;
-    fl.innerHTML = state.sections.map(sectionHTML).join('');
+    fl.innerHTML = state.sections.map(function(s, i){ return state.hiddenSecs.indexOf(s.title) >= 0 ? '' : sectionHTML(s, i); }).join('');
   }
   fitImages(); fitPrices(); updateScale();
 }
@@ -1343,11 +1346,13 @@ function renderSecList(){
   list.innerHTML = secs.map(function(s, i){
     var t = toneOf(s.theme);
     var cards = s.subs.reduce(function(a, sb){ return a + sb.cards.length; }, 0);
-    return '<div class="sec-item" data-sec-title="' + esc(s.title) + '"><div class="sec-head">' +
+    var on = state.hiddenSecs.indexOf(s.title) < 0;
+    return '<div class="sec-item' + (on ? '' : ' off') + '" data-sec-title="' + esc(s.title) + '"><div class="sec-head">' +
+      '<input type="checkbox" data-show' + (on ? ' checked' : '') + ' aria-label="Hiện ' + esc(s.title) + ' trên flyer" title="Hiện trên flyer">' +
       '<b><span class="swatch" style="background:' + t.band + '"></span>' + esc(s.title) + ' <span>' + s.n + ' SP, ' + cards + ' ô</span></b>' +
       '<button class="btn icon" type="button" data-move="-1" aria-label="Đưa ' + esc(s.title) + ' lên"' + (i === 0 ? ' disabled' : '') + '>↑</button>' +
       '<button class="btn icon" type="button" data-move="1" aria-label="Đưa ' + esc(s.title) + ' xuống"' + (i === secs.length - 1 ? ' disabled' : '') + '>↓</button>' +
-      '<button class="btn small" type="button" data-sec-export="' + i + '">Xuất phần này</button></div>' +
+      '<button class="btn small" type="button" data-sec-export="' + i + '"' + (on ? '' : ' disabled') + '>Xuất phần này</button></div>' +
       '<label>Ghi chú cuối phần<input type="text" data-note value="' + esc(s.note) + '" placeholder="(không có)"></label></div>';
   }).join('');
 }
@@ -2097,6 +2102,13 @@ function wire(){
       var t = state.sections[i2] ? state.sections[i2].title : ('phan-' + (i2 + 1));
       doExport(node, 'flyer-' + t + '-' + today() + '.png', true, [ex]);
     }
+  });
+  secList.addEventListener('change', function(e){
+    if(!e.target.matches('[data-show]')) return;
+    var title = e.target.closest('[data-sec-title]').dataset.secTitle, i = state.hiddenSecs.indexOf(title);
+    if(e.target.checked){ if(i >= 0) state.hiddenSecs.splice(i, 1); } else if(i < 0) state.hiddenSecs.push(title);
+    LS.set('kf2.hiddensecs', state.hiddenSecs);
+    renderSecList(); renderFlyer();
   });
   secList.addEventListener('input', function(e){
     if(!e.target.matches('[data-note]')) return;
