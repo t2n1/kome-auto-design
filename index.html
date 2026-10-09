@@ -1902,6 +1902,7 @@ function renderBlob(node, transparent){
   if(!transparent){
     if(state.settings.bg === 'white') opts.backgroundColor = '#FFFFFF';
     else if(state.settings.bg === 'style') opts.backgroundColor = curStyle().bg;
+    else opts.backgroundColor = '#FFFFFF';
   }
   if(transparent) opts.style = {background: 'transparent'};
   // % badges hang outside the card (more so the scaled-up top one); a section's own box would
@@ -1930,16 +1931,16 @@ function renderBlob(node, transparent){
     return isSafari ? htmlToImage.toCanvas(node, opts).then(function(){ return htmlToImage.toCanvas(node, opts); }) : htmlToImage.toCanvas(node, opts);
   }).then(function(canvas){ return shrinkToLimit(canvas, transparent); });
 }
-// keep every export under MAX_BYTES: PNG if it fits, else the best JPG quality that fits
-// (not for transparent exports), else scale the picture down and try again
+// keep every export under MAX_BYTES: JPG at the best quality that fits (PNG only when it must stay
+// transparent), else scale the picture down and try again
 var MAX_BYTES = 1990000;
 function encode(c, type, q){ return new Promise(function(res){ c.toBlob(res, type, q); }); }
 function shrinkToLimit(canvas, transparent){
   state.lastShrink = null;
   function attempt(c, round){
-    return encode(c, 'image/png').then(function(png){
-      if(png && png.size <= MAX_BYTES) return {blob: png, ext: 'png', w: c.width};
-      if(transparent) return {over: png ? png.size : 0};
+    var first = transparent ? encode(c, 'image/png') : Promise.resolve(null);
+    return first.then(function(png){
+      if(transparent) return png && png.size <= MAX_BYTES ? {blob: png, ext: 'png', w: c.width} : {over: png ? png.size : 0};
       var lo = 0.5, hi = 0.95, best = null, last = 0, i = 0;
       function step(){
         if(i++ >= 6) return Promise.resolve(best ? best : {over: last});
@@ -2138,7 +2139,7 @@ function wire(){
       var i2 = +ex.dataset.secExport, node = document.querySelector('#flyer .fl-sec[data-sec="' + i2 + '"]');
       if(!node) return;
       var t = state.sections[i2] ? state.sections[i2].title : ('phan-' + (i2 + 1));
-      doExport(node, 'flyer-' + t + '-' + today() + '.png', true, [ex]);
+      doExport(node, 'flyer-' + t + '-' + today() + '.png', false, [ex]);
     }
   });
   secList.addEventListener('change', function(e){
